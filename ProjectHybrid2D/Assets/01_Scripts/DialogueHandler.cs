@@ -1,12 +1,12 @@
-using System;
 using System.Threading.Tasks;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class DialogueHandler : MonoBehaviour
 {
     [Tooltip("Amount of seconds, delay.")]
-    [SerializeField] private float writeSpeed = 2.0f;
+    [SerializeField] private float writeSpeed = 0.05f;
 
     //Seperate
     [SerializeField] private string[] possibleCorrectDialogue;
@@ -15,37 +15,39 @@ public class DialogueHandler : MonoBehaviour
     [SerializeField] private TMP_Text dialogueText;
     private bool continueDialogue;
 
-    public void SetContinuationAction ( Action<Customer, bool> action )
+    public async void ContinueDialogue(Customer customer, bool correct)
     {
-        action += ContinueDialogue;
-    }
+        Debug.Log(correct);
 
-    private async void ContinueDialogue ( Customer customer, bool correct )
-    {
-        await TypeWriterPlay(correct ? Utility.GetRandomElementFromArray(possibleCorrectDialogue) :
-            Utility.GetRandomElementFromArray(possibleInCorrectDialogue));
+        var text = correct ? Utility.GetRandomElementFromArray(possibleCorrectDialogue) :
+            Utility.GetRandomElementFromArray(possibleInCorrectDialogue);
+        Debug.Log(text);
+        await TypeWriterPlay(text);
 
         continueDialogue = true;
     }
 
-    public void EndDialogue ()
+    public void EndDialogue()
     {
 
     }
 
-    public async void PlayDialogue ( Customer customer )
+    public async void PlayDialogue(Customer customer)
     {
         await TypeWriterPlay(customer.CurrentDialogue());
         customer.NextDialogue();
         await TypeWriterPlay(customer.CurrentDialogue());
+        customer.NextDialogue();
 
+        var waitingCount = 0;
         await Awaitable.BackgroundThreadAsync();
-        foreach ( var _ in customer.DesiredPotion )
+        foreach (var _ in customer.DesiredPotion)
         {
-            while ( !continueDialogue )
+            while (!continueDialogue)
             {
-                await Awaitable.WaitForSecondsAsync(0.1f);
+                waitingCount++;
             }
+            waitingCount = 0;
             continueDialogue = false;
 
             await TypeWriterPlay(customer.CurrentDialogue());
@@ -53,14 +55,21 @@ public class DialogueHandler : MonoBehaviour
         }
     }
 
-    private async Task TypeWriterPlay ( string text )
+    private async Task TypeWriterPlay(string text)
     {
+        if (text == "") { return; }
+
+        await Awaitable.MainThreadAsync();
+
+        Debug.Log("Starting Write.");
         dialogueText.text = "";
 
-        foreach ( char c in text )
+        foreach (char c in text)
         {
             dialogueText.text += c;
             await Awaitable.WaitForSecondsAsync(writeSpeed);
         }
+
+        await Awaitable.BackgroundThreadAsync();
     }
 }

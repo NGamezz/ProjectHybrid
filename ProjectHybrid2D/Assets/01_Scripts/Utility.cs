@@ -8,7 +8,7 @@ using Unity.VisualScripting;
 
 public static class Utility
 {
-    public static void Testing ()
+    public static void Testing()
     {
         //var costumePart = CostumePart.Shark | CostumePart.Bear | CostumePart.Tiger | CostumePart.Panda | CostumePart.Clown;
         ////Remove
@@ -43,46 +43,53 @@ public static class Utility
         //Debug.Log(Utility.TimeSpanOfAction(() => { _ = 500 * -1; }));
     }
 
-    public static T GetRandomElementFromArray<T> ( T[] array )
+    public static T GetRandomElementFromArray<T>(T[] array)
     {
         var rand = new Unity.Mathematics.Random(1);
         var str = array[rand.NextInt(array.Length)];
         return str;
     }
 
-    public static T GetRandomElementFromArray<T> ( List<T> array )
+    public static T GetRandomElementFromArray<T>(List<T> array)
     {
         var rand = new Unity.Mathematics.Random(1);
         var str = array[rand.NextInt(array.Count)];
         return str;
     }
 
-    public static T GetRandomElementFromArray<T> ( T[] array, T hasString, int indexer, int maxIndexer ) where T : class
+    public static T GetRandomElementFromArray<T>(T[] array, T hasString, int indexer, int maxIndexer) where T : class
     {
         var rand = new Unity.Mathematics.Random(1);
         var str = array[rand.NextInt(array.Length)];
-        if ( hasString != null && str == hasString && array.Length > 1 && indexer <= maxIndexer )
+        if (hasString != null && str == hasString && array.Length > 1 && indexer <= maxIndexer)
         {
             indexer++;
             return GetRandomElementFromArray(array, hasString, indexer, maxIndexer);
         }
-        else if ( indexer > maxIndexer && hasString != null && str == hasString )
+        else if (indexer > maxIndexer && hasString != null && str == hasString)
         {
             return null;
         }
         return str;
     }
 
-    public static T GetRandomElementFromList<T> ( List<T> list, T[] options, int indexer, int maxIndexer )
+    public static void WriteToArduino(string msg, System.IO.Ports.SerialPort port)
+    {
+        port.WriteLine(msg);
+        port.BaseStream.Flush();
+    }
+
+    public static T GetRandomElementFromList<T>(List<T> list, List<T> options, int indexer, int maxIndexer)
     {
         T obj = GetRandomElementFromArray(options);
 
-        if ( list.Contains(obj) && indexer <= maxIndexer )
+        if (list.Contains(obj) && indexer <= maxIndexer)
         {
             indexer++;
+            options.Remove(obj);
             return GetRandomElementFromList(list, options, indexer, maxIndexer);
         }
-        else if ( !list.Contains(obj) )
+        else if (!list.Contains(obj))
         {
             return obj;
         }
@@ -92,21 +99,21 @@ public static class Utility
         }
     }
 
-    public static TimeSpan TimeSpanOfAction ( Action action )
+    public static TimeSpan TimeSpanOfAction(Action action)
     {
         Stopwatch sw = Stopwatch.StartNew();
         action?.Invoke();
         return sw.Elapsed;
     }
 
-    public static IEnumerator WaitForSeconds ( float seconds )
+    public static IEnumerator WaitForSeconds(float seconds)
     {
         yield return new WaitForSeconds(seconds);
     }
 
-    public static int BitAdd ( int a, int b )
+    public static int BitAdd(int a, int b)
     {
-        while ( b != 0 )
+        while (b != 0)
         {
             int carry = a & b;
             a ^= b;
@@ -116,9 +123,9 @@ public static class Utility
     }
 
     //Often faster than the regular version. Still ever so slightly slower than the + operator though.
-    public static int BitAddRecurse ( int a, int b )
+    public static int BitAddRecurse(int a, int b)
     {
-        if ( b == 0 )
+        if (b == 0)
         {
             return a;
         }
@@ -128,15 +135,15 @@ public static class Utility
         }
     }
 
-    public static int BitMultiply ( int a, int b )
+    public static int BitMultiply(int a, int b)
     {
         int result = 0;
         bool negative = a < 0 ^ b < 0;
         a = math.abs(a);
         b = math.abs(b);
-        while ( b > 0 )
+        while (b > 0)
         {
-            if ( (b & 1) == 1 )
+            if ((b & 1) == 1)
             {
                 result += a;
             }
@@ -146,16 +153,16 @@ public static class Utility
         return negative ? (~result) - 1 : result;
     }
 
-    public static int BitDivide ( int a, int b )
+    public static int BitDivide(int a, int b)
     {
         int result = 0;
         bool negative = a < 0 ^ b < 0;
         a = math.abs(a);
         b = math.abs(b);
-        for ( int i = 31; i > -1; i-- )
+        for (int i = 31; i > -1; i--)
         {
             int c = b << i;
-            if ( b << i <= a && c > 0 )
+            if (b << i <= a && c > 0)
             {
                 a -= (b << i);
                 result += 1 << i;

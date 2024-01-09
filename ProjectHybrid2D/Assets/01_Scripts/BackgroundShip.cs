@@ -18,19 +18,19 @@ public class BackgroundShip : MonoBehaviour
 
     private Vector3 targetPosition = Vector3.zero;
 
-    private void Start ()
+    private void Start()
     {
         SetRandomPosition();
     }
 
-    private void SetRandomPosition ()
+    private void SetRandomPosition()
     {
         Vector3 newPosition = Random.insideUnitCircle.normalized * Random.Range(20, 30);
         newPosition.z = shipObject.transform.position.z;
         shipObject.transform.position = newPosition;
     }
 
-    public void SpawnShip ()
+    public void SpawnShip()
     {
         SetRandomPosition();
 
@@ -44,17 +44,16 @@ public class BackgroundShip : MonoBehaviour
     {
         var direction = targetPosition - shipObject.transform.position;
         direction.z = 0;
-        if ( direction.magnitude > 5.0f )
+        if (direction.magnitude > 5.0f)
         {
             shipObject.transform.Translate(moveSpeed * Time.fixedDeltaTime * direction.normalized, Space.World);
         }
         else
         {
-            Debug.Log("Reached Destination.");
             targetPosition = Vector3.zero;
         }
 
-        if(spin)
+        if (spin)
         {
             Vector3 rotation = Vector3.zero;
             rotation[(int)rotationAxis] = spinIncrement;
@@ -62,9 +61,9 @@ public class BackgroundShip : MonoBehaviour
         }
     }
 
-    private void FixedUpdate ()
+    private void FixedUpdate()
     {
-        if ( targetPosition == Vector3.zero )
+        if (targetPosition == Vector3.zero)
         { return; }
 
         HandleMovement();

@@ -9,7 +9,7 @@ public class CustomerHandler : MonoBehaviour
 {
     private CustomerCreater creater;
     private DialogueHandler dialogueHandler;
-    [SerializeField] private List<Customer> customers = new List<Customer>();
+    [SerializeField] private List<Customer> customers = new();
 
     private Ingredients currentIngredients;
     private int currentAmountOfIngredients = 0;
@@ -17,45 +17,65 @@ public class CustomerHandler : MonoBehaviour
 
     private SerialPort port;
 
-    private Action<Customer, bool> continuationAction;
+    private const string arduinoPort = "COM4";
 
-    private void Awake ()
+    private Action<Customer, bool> continuationAction;
+    private Action outOfPotionsAction;
+
+    private void Awake()
     {
         creater = GetComponent<CustomerCreater>();
         dialogueHandler = GetComponent<DialogueHandler>();
     }
 
-    void Start ()
+    private void OnDisable()
     {
-        //Setup();
-
-        var customer = creater.CreateCustomer();
-        customers.Add(customer);
+        port.Close();
     }
 
-    private void Setup ()
+    void Start()
     {
-        port = new SerialPort("COM4", 9600)
-        {
-            ReadTimeout = 50
-        };
+        continuationAction += Test;
+        outOfPotionsAction += (() => Debug.Log("Out Of Potions."));
+        outOfPotionsAction += NextCustomer;
+        Setup();
+    }
+
+    private void Test(Customer customer, bool isCorrect)
+    {
+        currentIngredients ^= currentIngredients;
+
+        Debug.Log(isCorrect);
+        Debug.Log(customer.CurrentPotionIndex);
+    }
+
+    private void Setup()
+    {
+        port = new SerialPort(arduinoPort, 9600);
         port.Open();
 
-        dialogueHandler.SetContinuationAction(continuationAction);
+        continuationAction += dialogueHandler.ContinueDialogue;
+
+        NextCustomer();
     }
 
-    public async void NextCustomer ()
+    public async void NextCustomer()
     {
-        await Awaitable.BackgroundThreadAsync();
-
         var customer = creater.CreateCustomer();
         customers.Add(customer);
 
-        await PerformCustomerTask(customer);
+        dialogueHandler.PlayDialogue(customer);
 
-        for ( int i = 0; i < customer.DesiredPotion.Count; i++ )
+        customer.SetOutOfPotionsAction(outOfPotionsAction);
+
+        await Awaitable.BackgroundThreadAsync();
+
+        for (int i = 0; i < customer.DesiredPotion.Count; i++)
         {
             currentIngredients ^= currentIngredients;
+            currentAmountOfIngredients = 0;
+
+            awaitingIngredients = true;
 
             await AwaitInput(InputIngredients, customer, i);
 
@@ -63,43 +83,50 @@ public class CustomerHandler : MonoBehaviour
         }
     }
 
-    public async Task AwaitInput ( Action<string> callBack, Customer customer, int potionIndex )
+    public async Task AwaitInput(Action<string> callBack, Customer customer, int potionIndex)
     {
         await Awaitable.BackgroundThreadAsync();
 
-        while ( awaitingIngredients )
+        while (awaitingIngredients)
         {
             string data = null;
             try
             {
                 data = port.ReadLine();
             }
-            catch ( TimeoutException )
+            catch (TimeoutException)
             {
                 Debug.LogWarning("Timed out.");
             }
 
-            if ( data != null )
+            if (data != null && int.TryParse(data, out int result))
             {
-                callBack?.Invoke(data);
+                var currentIngredient = (Ingredients)(1 << result);
+                if (!((currentIngredients & currentIngredient) != 0))
+                {
+                    Debug.Log((Ingredients)(1 << result));
+                    Debug.Log(data);
+                    callBack?.Invoke(data);
+                }
             }
 
-            if ( currentAmountOfIngredients >= customer.DesiredPotion[potionIndex].AmountOfIngredients )
+            if (currentAmountOfIngredients >= customer.DesiredPotion[potionIndex].AmountOfIngredients)
             {
                 DisableAwaitingInput();
             }
         }
     }
 
-    //For externally disabling the waiting.
-    public void DisableAwaitingInput ()
+    //For externally disabling the waiting. 
+
+    public void DisableAwaitingInput()
     {
         awaitingIngredients = false;
     }
 
-    public void InputIngredients ( string input )
+    public void InputIngredients(string input)
     {
-        if ( int.TryParse(input, out int result) )
+        if (int.TryParse(input, out int result))
         {
             var ingredient = (Ingredients)(1 << result);
             currentIngredients |= ingredient;
@@ -108,19 +135,17 @@ public class CustomerHandler : MonoBehaviour
     }
 
     //Something which is to be determined;
-    private async Task PerformCustomerTask ( Customer customer )
+    private async Task PerformCustomerTask(Customer customer)
     {
         await Awaitable.BackgroundThreadAsync();
 
-        bool performingTask = true;
+        //bool performingTask = true;
 
-        while ( performingTask )
-        {
-            performingTask = false;
-        }
+        //while (performingTask)
+        //{
+        //    performingTask = false;
+        //}
 
-        dialogueHandler.PlayDialogue(customer);
-
-        awaitingIngredients = true;
+        //dialogueHandler.PlayDialogue(customer);
     }
 }

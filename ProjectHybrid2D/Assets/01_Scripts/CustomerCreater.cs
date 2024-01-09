@@ -3,6 +3,7 @@ using System;
 using Unity.Mathematics;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Linq;
 
 [Serializable]
 public class Potion
@@ -14,9 +15,6 @@ public class Potion
 
 public class CustomerCreater : MonoBehaviour
 {
-    [SerializeField] private SkinnedMeshRenderer skinnedMeshRenderer;
-    [SerializeField] private Mesh[] meshArray;
-
     [SerializeField] private Potion[] possiblePotions;
 
     [SerializeField] private string[] possibleNames;
@@ -30,36 +28,29 @@ public class CustomerCreater : MonoBehaviour
         "Used during the randomization of the potion ingredients."), Range(1, 10)]
     [SerializeField] private int maxAmountOfIngredientRetries = 5;
 
-    private int amountOfRandomPotionTries = 0;
     private int numberOfPossiblePotions;
 
-    private void Start ()
+    private void Start()
     {
         numberOfPossiblePotions = possiblePotions.Length;
 
         minAndMaxAmountOfPotions.y += 1;
 
-        if ( minAndMaxAmountOfPotions.y > numberOfPossiblePotions || minAndMaxAmountOfPotions.y == 0 )
+        if (minAndMaxAmountOfPotions.y > numberOfPossiblePotions || minAndMaxAmountOfPotions.y == 0)
         {
             minAndMaxAmountOfPotions.y = numberOfPossiblePotions;
         }
-        if ( minAndMaxAmountOfPotions.x >= numberOfPossiblePotions || minAndMaxAmountOfPotions.x == 0 )
+        if (minAndMaxAmountOfPotions.x >= numberOfPossiblePotions || minAndMaxAmountOfPotions.x == 0)
         {
             minAndMaxAmountOfPotions.x = numberOfPossiblePotions - 1;
         }
     }
 
-    private GameObject GenerateRandomMesh ()
-    {
-        GameObject mesh = new();
-        return mesh;
-    }
-
-    private async Task<string[]> SetDialogue ( Customer customer )
+    private async Task<string[]> SetDialogue(Customer customer)
     {
         await Awaitable.BackgroundThreadAsync();
 
-        string[] dialogue = new string[customer.DesiredPotion.Count * 2 + 1];
+        string[] dialogue = new string[customer.DesiredPotion.Count + 2];
 
         dialogue[0] = Utility.GetRandomElementFromArray(possibleOpeningDialogue);
 
@@ -67,12 +58,12 @@ public class CustomerCreater : MonoBehaviour
 
         string currentString = "";
         int index = 2;
-        foreach ( var potion in customer.DesiredPotion )
+        foreach (var potion in customer.DesiredPotion)
         {
             dialogue[1] += $", {potion.Name}";
             var current = Utility.GetRandomElementFromArray(possibleNextPotionDialogue, currentString, 0, maxAmountOfIngredientRetries);
 
-            if ( current == null )
+            if (current == null)
             { continue; }
 
             currentString = current;
@@ -80,19 +71,19 @@ public class CustomerCreater : MonoBehaviour
             index++;
         }
 
-        await Awaitable.MainThreadAsync();
-
         return dialogue;
     }
 
-    public void ReuseCustomer ( ref Customer customer )
+    public void ReuseCustomer(ref Customer customer)
     {
         int amountOfPotions = UnityEngine.Random.Range(minAndMaxAmountOfPotions.x, minAndMaxAmountOfPotions.y);
 
-        for ( int i = 0; i < amountOfPotions; i++ )
+        Debug.Log($"Creating {amountOfPotions} potions.");
+
+        for (int i = 0; i < amountOfPotions; i++)
         {
-            var potion = Utility.GetRandomElementFromList(customer.DesiredPotion, possiblePotions, 0, maxAmountOfIngredientRetries);
-            if ( potion != null )
+            var potion = Utility.GetRandomElementFromList(customer.DesiredPotion, possiblePotions.ToList(), 0, maxAmountOfIngredientRetries);
+            if (potion != null)
             {
                 customer.DesiredPotion.Add(potion);
             }
@@ -103,14 +94,11 @@ public class CustomerCreater : MonoBehaviour
         customer.Name = GenerateName();
         UnityEngine.Debug.Log("Created Name.");
 
-        //customer.Dialogue = SetDialogue(customer).Result;
-        //UnityEngine.Debug.Log("Created Dialogue.");
-
-        customer.meshObject = GenerateRandomMesh();
-        UnityEngine.Debug.Log("Created Mesh.");
+        customer.Dialogue = SetDialogue(customer).Result;
+        UnityEngine.Debug.Log("Created Dialogue.");
     }
 
-    public Customer CreateCustomer ()
+    public Customer CreateCustomer()
     {
         var customer = new Customer();
 
@@ -119,9 +107,9 @@ public class CustomerCreater : MonoBehaviour
         return customer;
     }
 
-    private string GenerateName ()
+    private string GenerateName()
     {
-        if ( possibleNames.Length < 1 )
+        if (possibleNames.Length < 1)
         { return ""; }
 
         string name = Utility.GetRandomElementFromArray(possibleNames);
@@ -134,41 +122,41 @@ public class Customer
 {
     public GameObject meshObject;
     public string Name;
-    //public Ingredients DesiredPotionIngredients;
     public string[] Dialogue;
     public List<Potion> DesiredPotion = new();
     public int AmountOfPotions;
-    private int currentPotionIndex = 0;
+    public int CurrentPotionIndex { get; private set; } = 0;
     private int currentDialogueIndex = 0;
 
     private Action outOfPotions;
 
-    public void NextDialogue ()
+    public void NextDialogue()
     {
         currentDialogueIndex = (currentDialogueIndex + 1) % Dialogue.Length;
     }
 
-    public void SetOutOfPotionsAction ( Action action )
+    public void SetOutOfPotionsAction(Action action)
     {
         outOfPotions = action;
     }
 
-    public string CurrentDialogue ()
+    public string CurrentDialogue()
     {
         return Dialogue[currentDialogueIndex];
     }
 
-    public bool AreIngredientsCorrect ( Ingredients insertedIngredients, Action<Customer, bool> callBack )
+    public bool AreIngredientsCorrect(Ingredients insertedIngredients, Action<Customer, bool> callBack)
     {
-        bool isCorrect = (DesiredPotion[currentPotionIndex].Ingredients == insertedIngredients);
+        bool isCorrect = (DesiredPotion[CurrentPotionIndex].Ingredients == insertedIngredients);
 
-        if ( isCorrect )
+        if (isCorrect)
         {
-            if ( currentPotionIndex >= DesiredPotion.Count )
+            CurrentPotionIndex++;
+            if (CurrentPotionIndex >= DesiredPotion.Count)
             {
                 outOfPotions?.Invoke();
+                CurrentPotionIndex = 0;
             }
-            currentPotionIndex = (currentPotionIndex + 1) % DesiredPotion.Count;
         }
 
         callBack?.Invoke(this, isCorrect);
