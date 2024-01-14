@@ -11,45 +11,51 @@ public class CustomerHandler : MonoBehaviour
     private DialogueHandler dialogueHandler;
     [SerializeField] private List<Customer> customers = new();
 
+    [SerializeField] private float customerMoveSpeed = 5.0f;
+
     private Ingredients currentIngredients;
     private int currentAmountOfIngredients = 0;
     private bool awaitingIngredients = false;
 
+    private Vector3 ownPosition;
+
     private SerialPort port;
 
-    private const string arduinoPort = "COM4";
+    [SerializeField] private string arduinoPort = "COM8";
 
     private Action<Customer, bool> continuationAction;
     private Action outOfPotionsAction;
+    private bool endAwaitInput = false;
 
-    private void Awake()
+    private void Awake ()
     {
         creater = GetComponent<CustomerCreater>();
         dialogueHandler = GetComponent<DialogueHandler>();
     }
 
-    private void OnDisable()
+    private void OnDisable ()
     {
         port.Close();
     }
 
-    void Start()
+    void Start ()
     {
+        ownPosition = transform.position;
         continuationAction += Test;
         outOfPotionsAction += (() => Debug.Log("Out Of Potions."));
-        outOfPotionsAction += NextCustomer;
         Setup();
     }
 
-    private void Test(Customer customer, bool isCorrect)
+    private void Test ( Customer customer, bool isCorrect )
     {
-        currentIngredients ^= currentIngredients;
-
-        Debug.Log(isCorrect);
-        Debug.Log(customer.CurrentPotionIndex);
+        if ( !isCorrect )
+        {
+            endAwaitInput = true;
+            awaitingIngredients = false;
+        }
     }
 
-    private void Setup()
+    private void Setup ()
     {
         port = new SerialPort(arduinoPort, 9600);
         port.Open();
@@ -59,10 +65,13 @@ public class CustomerHandler : MonoBehaviour
         NextCustomer();
     }
 
-    public async void NextCustomer()
+    public async void NextCustomer ()
     {
+        Debug.Log("Create Customer");
         var customer = creater.CreateCustomer();
         customers.Add(customer);
+
+        await PerformCustomerTask(customer);
 
         dialogueHandler.PlayDialogue(customer);
 
@@ -70,8 +79,13 @@ public class CustomerHandler : MonoBehaviour
 
         await Awaitable.BackgroundThreadAsync();
 
-        for (int i = 0; i < customer.DesiredPotion.Count; i++)
+        for ( int i = 0; i < customer.DesiredPotion.Count; i++ )
         {
+            if ( endAwaitInput )
+            {
+                goto CustomerLeave;
+            }
+
             currentIngredients ^= currentIngredients;
             currentAmountOfIngredients = 0;
 
@@ -79,30 +93,41 @@ public class CustomerHandler : MonoBehaviour
 
             await AwaitInput(InputIngredients, customer, i);
 
+            if ( endAwaitInput )
+            {
+                goto CustomerLeave;
+            }
+
             customer.AreIngredientsCorrect(currentIngredients, continuationAction);
         }
+    CustomerLeave:
+
+        endAwaitInput = false;
+        dialogueHandler.EndDialogue();
+        await CustomerLeave(customer);
+        NextCustomer();
     }
 
-    public async Task AwaitInput(Action<string> callBack, Customer customer, int potionIndex)
+    public async Task AwaitInput ( Action<string> callBack, Customer customer, int potionIndex )
     {
         await Awaitable.BackgroundThreadAsync();
 
-        while (awaitingIngredients)
+        while ( awaitingIngredients )
         {
             string data = null;
             try
             {
                 data = port.ReadLine();
             }
-            catch (TimeoutException)
+            catch ( TimeoutException )
             {
                 Debug.LogWarning("Timed out.");
             }
 
-            if (data != null && int.TryParse(data, out int result))
+            if ( data != null && int.TryParse(data, out int result) )
             {
                 var currentIngredient = (Ingredients)(1 << result);
-                if (!((currentIngredients & currentIngredient) != 0))
+                if ( !((currentIngredients & currentIngredient) != 0) )
                 {
                     Debug.Log((Ingredients)(1 << result));
                     Debug.Log(data);
@@ -110,7 +135,7 @@ public class CustomerHandler : MonoBehaviour
                 }
             }
 
-            if (currentAmountOfIngredients >= customer.DesiredPotion[potionIndex].AmountOfIngredients)
+            if ( currentAmountOfIngredients >= customer.DesiredPotion[potionIndex].AmountOfIngredients || endAwaitInput )
             {
                 DisableAwaitingInput();
             }
@@ -118,15 +143,14 @@ public class CustomerHandler : MonoBehaviour
     }
 
     //For externally disabling the waiting. 
-
-    public void DisableAwaitingInput()
+    public void DisableAwaitingInput ()
     {
         awaitingIngredients = false;
     }
 
-    public void InputIngredients(string input)
+    public void InputIngredients ( string input )
     {
-        if (int.TryParse(input, out int result))
+        if ( int.TryParse(input, out int result) )
         {
             var ingredient = (Ingredients)(1 << result);
             currentIngredients |= ingredient;
@@ -134,18 +158,38 @@ public class CustomerHandler : MonoBehaviour
         }
     }
 
-    //Something which is to be determined;
-    private async Task PerformCustomerTask(Customer customer)
+    private async Task CustomerLeave ( Customer customer )
     {
-        await Awaitable.BackgroundThreadAsync();
+        await Awaitable.MainThreadAsync();
 
-        //bool performingTask = true;
+        Vector3 targetPosition = UnityEngine.Random.insideUnitCircle.normalized * UnityEngine.Random.Range(10, 15);
 
-        //while (performingTask)
-        //{
-        //    performingTask = false;
-        //}
+        targetPosition.z = 0;
+        var distance = targetPosition - customer.meshObject.transform.position;
+        distance.z = 0;
 
-        //dialogueHandler.PlayDialogue(customer);
+        while ( distance.magnitude > 1.0f )
+        {
+            distance = targetPosition - customer.meshObject.transform.position;
+            distance.z = 0;
+            customer.meshObject.transform.Translate(customerMoveSpeed * Time.deltaTime * distance.normalized, Space.World);
+            await Task.Delay(10);
+        }
+    }
+
+    private async Task PerformCustomerTask ( Customer customer )
+    {
+        await Awaitable.MainThreadAsync();
+
+        var distance = ownPosition - customer.meshObject.transform.position;
+        distance.z = 0;
+
+        while ( distance.magnitude > 1.0f )
+        {
+            distance = ownPosition - customer.meshObject.transform.position;
+            distance.z = 0;
+            customer.meshObject.transform.Translate(customerMoveSpeed * Time.deltaTime * distance.normalized, Space.World);
+            await Task.Delay(10);
+        }
     }
 }

@@ -1,22 +1,9 @@
-using System.ComponentModel;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    //[SerializeField] private CameraObject[] cameras;
     private Camera[] cameras;
     private Display[] displays;
-
-    //public Display GetDisplay ()
-    //{
-    //    Display display;
-    //    lock ( displays )
-    //    {
-    //        display = displays[displayIndex];
-    //        displayIndex++;
-    //    }
-    //    return display;
-    //}
 
     private void Awake ()
     {
