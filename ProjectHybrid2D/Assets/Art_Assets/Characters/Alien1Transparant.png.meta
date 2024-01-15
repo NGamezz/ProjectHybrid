@@ -130,7 +130,8 @@ TextureImporter:
     edges: []
     weights: []
     secondaryTextures: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      Alien1Transparant_0: 5625375706086346290
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

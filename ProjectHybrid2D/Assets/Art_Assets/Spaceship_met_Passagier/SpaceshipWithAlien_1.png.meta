@@ -130,7 +130,8 @@ TextureImporter:
     edges: []
     weights: []
     secondaryTextures: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      SpaceshipWithAlien_1_0: -8138610538468185451
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -130,7 +130,8 @@ TextureImporter:
     edges: []
     weights: []
     secondaryTextures: []
-    nameFileIdTable: {}
+    nameFileIdTable:
+      Space_Achtergrond_8_0: 8879808138593084006
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -1,8 +1,6 @@
 using System.Threading.Tasks;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.U2D;
 
 public class DialogueHandler : MonoBehaviour
 {
@@ -13,7 +11,6 @@ public class DialogueHandler : MonoBehaviour
     [SerializeField] private string[] possibleInCorrectDialogue;
 
     [SerializeField] private GameObject textBubbleGameObject;
-    [SerializeField] private SpriteShapeController spriteShapeController;
 
     [SerializeField] private TMP_Text dialogueText;
     private bool continueDialogue;
@@ -24,7 +21,7 @@ public class DialogueHandler : MonoBehaviour
     private void Awake()
     {
         utility.Setup();
-        textBubbleGameObject.SetActive(false);
+        SetBubble(false);
     }
 
     public async void SetBubble(bool state)
@@ -56,20 +53,10 @@ public class DialogueHandler : MonoBehaviour
         cancel = true;
     }
 
-    private void SetTextBubble(Vector3 customerPosition)
-    {
-        var spline = spriteShapeController.spline;
-        spline.SetTangentMode(8, ShapeTangentMode.Continuous);
-        spline.SetPosition(8, spriteShapeController.transform.InverseTransformPoint(customerPosition));
-        spline.SetHeight(8, 0.1f);
-        spriteShapeController.BakeCollider();
-    }
-
     public async void PlayDialogue(Customer customer)
     {
         cancel = false;
         SetBubble(true);
-        //SetTextBubble(customer.meshObject.transform.position);
         await TypeWriterPlay(customer.CurrentDialogue());
         customer.NextDialogue();
         await TypeWriterPlay(customer.CurrentDialogue());
