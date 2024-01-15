@@ -17,7 +17,7 @@ public class DialogueHandler : MonoBehaviour
 
     private Custom.Utility utility = new();
     private bool cancel = false;
-
+    
     private void Awake()
     {
         utility.Setup();
@@ -62,16 +62,12 @@ public class DialogueHandler : MonoBehaviour
         await TypeWriterPlay(customer.CurrentDialogue());
         customer.NextDialogue();
 
-        var waitingCount = 0;
-        await Awaitable.BackgroundThreadAsync();
         foreach (var _ in customer.DesiredPotion)
         {
             while (!continueDialogue && !cancel)
             {
-                waitingCount++;
+                await Awaitable.WaitForSecondsAsync(0.1f);
             }
-
-            waitingCount = 0;
             continueDialogue = false;
 
             await TypeWriterPlay(customer.CurrentDialogue());

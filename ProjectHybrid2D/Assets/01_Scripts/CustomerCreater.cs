@@ -67,13 +67,24 @@ public class CustomerCreater : MonoBehaviour
 
         string currentString = "";
         int index = 2;
-        foreach ( var potion in customer.DesiredPotion )
-        {
-            dialogue[1] += $"- {potion.Name}\n";
-            var current = utility.GetRandomElementFromArray(possibleNextPotionDialogue, currentString, 0, maxAmountOfIngredientRetries);
 
-            if ( current == null || customer.DesiredPotion.Count <= 1)
-            { continue; }
+        for ( int i = 0; i < customer.DesiredPotion.Count; i++ )
+        {
+            var potion = customer.DesiredPotion[i];
+
+            dialogue[1] += $"- {potion.Name}\n";
+
+            if ( customer.DesiredPotion.Count == 1 || i == customer.DesiredPotion.Count - 1 )
+            {
+                Debug.Log("Count is 1.");
+                return dialogue;
+            }
+
+            var current = utility.GetRandomElementFromArray(possibleNextPotionDialogue, currentString, 0, maxAmountOfIngredientRetries);
+            if ( current == null )
+            {
+                continue;
+            }
 
             currentString = current;
             dialogue[index] = currentString;
@@ -112,6 +123,7 @@ public class CustomerCreater : MonoBehaviour
         UnityEngine.Debug.Log("Set Mesh.");
     }
 
+    private GameObject previousGameObject;
     private async Task<GameObject> GetGameObject ()
     {
         if ( possibleMeshes.Length < 1 )
@@ -119,7 +131,10 @@ public class CustomerCreater : MonoBehaviour
 
         await Awaitable.MainThreadAsync();
 
-        var gameObject = Instantiate(utility.GetRandomElementFromArray(possibleMeshes), transform);
+        var prefab = utility.GetRandomElementFromArray(possibleMeshes, previousGameObject, 0, 5);
+        previousGameObject = prefab;
+
+        var gameObject = Instantiate(prefab, transform);
         gameObject.transform.position = UnityEngine.Random.insideUnitCircle.normalized * UnityEngine.Random.Range(10, 15);
 
         return gameObject;
