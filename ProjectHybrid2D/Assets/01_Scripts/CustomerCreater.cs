@@ -59,7 +59,7 @@ public class CustomerCreater : MonoBehaviour
 
     private string[] SetDialogue ( Customer customer )
     {
-        string[] dialogue = new string[customer.DesiredPotion.Count + 2];
+        string[] dialogue = new string[customer.DesiredPotion.Count + 1];
 
         dialogue[0] = utility.GetRandomElementFromArray(possibleOpeningDialogue);
 
@@ -72,7 +72,7 @@ public class CustomerCreater : MonoBehaviour
             dialogue[1] += $"- {potion.Name}\n";
             var current = utility.GetRandomElementFromArray(possibleNextPotionDialogue, currentString, 0, maxAmountOfIngredientRetries);
 
-            if ( current == null )
+            if ( current == null || customer.DesiredPotion.Count <= 1)
             { continue; }
 
             currentString = current;

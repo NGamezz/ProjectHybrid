@@ -75,7 +75,7 @@ namespace Custom
 
         public T GetRandomElementFromArray<T> ( T[] array, T hasString, int indexer, int maxIndexer ) where T : class
         {
-            var str = array[random.NextInt(0, array.Length)];
+            T str = GetRandomElementFromArray(array);
             if ( hasString != null && str == hasString && array.Length > 1 && indexer <= maxIndexer )
             {
                 indexer++;
@@ -88,7 +88,7 @@ namespace Custom
             return str;
         }
 
-        public static void WriteToArduino ( string msg, System.IO.Ports.SerialPort port )
+        public static void WriteToPort ( string msg, System.IO.Ports.SerialPort port )
         {
             port.WriteLine(msg);
             port.BaseStream.Flush();

@@ -103,7 +103,6 @@ public class CustomerHandler : MonoBehaviour
     CustomerLeave:
 
         endAwaitInput = false;
-        dialogueHandler.EndDialogue();
         await CustomerLeave(customer);
         NextCustomer();
     }
