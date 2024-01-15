@@ -499,6 +499,37 @@ MonoBehaviour:
   Canvas: []
   camera: {fileID: 519420031}
   IsMainCamera: 1
+--- !u!1 &652452252
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 652452253}
+  m_Layer: 0
+  m_Name: TestSPaceship
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &652452253
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 652452252}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.50364506, y: 0.34221405, z: 0.021410411}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &662549070
 GameObject:
   m_ObjectHideFlags: 0
@@ -1038,11 +1069,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   stars:
-  - {fileID: 2651173216672858415, guid: 2a020c56260b0e34fb21b603d8cb1e66, type: 3}
+  - {fileID: 7152187716544904666, guid: 94feb2fc841179142b6e1eaf6eb5ae46, type: 3}
   starSpawnRange:
     x: 2
-    y: 8
-  amountOfStars: 75
+    y: 25
+  amountOfStars: 49
   moveSpeed: 0.75
   maxNewPosRetries: 5
   maxDistanceToCenter: 7
@@ -1305,6 +1336,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   customers: []
+  customerMoveSpeed: 5
+  arduinoPort: COM6
 --- !u!114 &1835227199
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1348,6 +1381,12 @@ MonoBehaviour:
   - May I get a
   possibleNextPotionDialogue:
   - Next potion.
+  possibleMeshes:
+  - {fileID: 2534371350695294774, guid: 5e2b2e75423510c469d971677f6b542d, type: 3}
+  - {fileID: 2912482113939404710, guid: 9b3383da564a8a44ea12421a42f77342, type: 3}
+  - {fileID: 3370494383283813322, guid: f0084d8ca2b9f1046b8a61fc76b6f7d9, type: 3}
+  - {fileID: 875381396304285445, guid: 4b761f2f693c27344ba5b5b4980e1cb1, type: 3}
+  - {fileID: 8970552062077839603, guid: ce52d8a03d135414680357380e140bfc, type: 3}
   minAndMaxAmountOfPotions:
     x: 2
     y: 6
@@ -1371,6 +1410,8 @@ MonoBehaviour:
   possibleInCorrectDialogue:
   - Wrong
   - '*Buzzer*'
+  textBubbleGameObject: {fileID: 0}
+  spriteShapeController: {fileID: 0}
   dialogueText: {fileID: 1301712635}
 --- !u!1 &1880477665
 GameObject:
@@ -1422,14 +1463,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 8941964845202951227, guid: bf1627479c6b1194ea474026d40c0fd1, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -1628,3 +1669,4 @@ SceneRoots:
   - {fileID: 1835227196}
   - {fileID: 1931890056}
   - {fileID: 1432617396}
+  - {fileID: 652452253}
