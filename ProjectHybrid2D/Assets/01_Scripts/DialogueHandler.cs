@@ -1,8 +1,6 @@
 using System.Threading.Tasks;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.U2D;
 
 public class DialogueHandler : MonoBehaviour
 {
@@ -13,7 +11,6 @@ public class DialogueHandler : MonoBehaviour
     [SerializeField] private string[] possibleInCorrectDialogue;
 
     [SerializeField] private GameObject textBubbleGameObject;
-    [SerializeField] private SpriteShapeController spriteShapeController;
 
     [SerializeField] private TMP_Text dialogueText;
     private bool continueDialogue;
@@ -21,27 +18,27 @@ public class DialogueHandler : MonoBehaviour
     private Custom.Utility utility = new();
     private bool cancel = false;
 
-    private void Awake ()
+    private void Awake()
     {
         utility.Setup();
-        textBubbleGameObject.SetActive(false);
+        SetBubble(false);
     }
 
-    public async void SetBubble ( bool state )
+    public async void SetBubble(bool state)
     {
         await Awaitable.MainThreadAsync();
 
         textBubbleGameObject.SetActive(state);
     }
 
-    public async void ContinueDialogue ( Customer customer, bool correct )
+    public async void ContinueDialogue(Customer customer, bool correct)
     {
         var text = correct ? utility.GetRandomElementFromArray(possibleCorrectDialogue) :
             utility.GetRandomElementFromArray(possibleInCorrectDialogue);
 
         await TypeWriterPlay(text);
 
-        if ( !correct )
+        if (!correct)
         {
             cancel = true;
         }
@@ -51,25 +48,15 @@ public class DialogueHandler : MonoBehaviour
         }
     }
 
-    public void EndDialogue ()
+    public void EndDialogue()
     {
         cancel = true;
     }
 
-    private void SetTextBubble ( Vector3 customerPosition )
-    {
-        var spline = spriteShapeController.spline;
-        spline.SetTangentMode(8, ShapeTangentMode.Continuous);
-        spline.SetPosition(8, spriteShapeController.transform.InverseTransformPoint(customerPosition));
-        spline.SetHeight(8, 0.1f);
-        spriteShapeController.BakeCollider();
-    }
-
-    public async void PlayDialogue ( Customer customer )
+    public async void PlayDialogue(Customer customer)
     {
         cancel = false;
         SetBubble(true);
-        //SetTextBubble(customer.meshObject.transform.position);
         await TypeWriterPlay(customer.CurrentDialogue());
         customer.NextDialogue();
         await TypeWriterPlay(customer.CurrentDialogue());
@@ -77,9 +64,9 @@ public class DialogueHandler : MonoBehaviour
 
         var waitingCount = 0;
         await Awaitable.BackgroundThreadAsync();
-        foreach ( var _ in customer.DesiredPotion )
+        foreach (var _ in customer.DesiredPotion)
         {
-            while ( !continueDialogue && !cancel )
+            while (!continueDialogue && !cancel)
             {
                 waitingCount++;
             }
@@ -90,7 +77,7 @@ public class DialogueHandler : MonoBehaviour
             await TypeWriterPlay(customer.CurrentDialogue());
             customer.NextDialogue();
 
-            if ( cancel )
+            if (cancel)
             {
                 SetBubble(false);
                 return;
@@ -100,18 +87,18 @@ public class DialogueHandler : MonoBehaviour
         SetBubble(false);
     }
 
-    private async Task TypeWriterPlay ( string text )
+    private async Task TypeWriterPlay(string text)
     {
-        if ( text == "" || cancel )
+        if (text == "" || cancel)
         { return; }
 
         await Awaitable.MainThreadAsync();
 
         dialogueText.text = "";
 
-        foreach ( char c in text )
+        foreach (char c in text)
         {
-            if ( cancel )
+            if (cancel)
             { return; }
 
             dialogueText.text += c;
