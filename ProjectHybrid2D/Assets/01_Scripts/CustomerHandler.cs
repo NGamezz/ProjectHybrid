@@ -18,7 +18,7 @@ public class CustomerHandler : MonoBehaviour
 
     [SerializeField] private float wobbleMagnitude = 1.0f;
 
-    private Ingredients currentIngredients;
+    private Ingredients currentIngredients = Ingredients.None;
     private int currentAmountOfIngredients = 0;
     private bool awaitingIngredients = false;
 
@@ -33,19 +33,19 @@ public class CustomerHandler : MonoBehaviour
     private bool endAwaitInput = false;
     private FluidHandler fluidHandler;
 
-    private void Awake ()
+    private void Awake()
     {
         creater = GetComponent<CustomerCreater>();
         dialogueHandler = GetComponent<DialogueHandler>();
         fluidHandler = GetComponent<FluidHandler>();
     }
 
-    private void OnDisable ()
+    private void OnDisable()
     {
         port.Close();
     }
 
-    void Start ()
+    void Start()
     {
         ownPosition = transform.position;
         continuationAction += Test;
@@ -55,18 +55,18 @@ public class CustomerHandler : MonoBehaviour
 
     private bool isCorrect = false;
 
-    private void Test ( Customer customer, bool isCorrect )
+    private void Test(Customer customer, bool isCorrect)
     {
         this.isCorrect = isCorrect;
 
-        if ( !isCorrect )
+        if (!isCorrect)
         {
             endAwaitInput = true;
             awaitingIngredients = false;
         }
     }
 
-    private void Setup ()
+    private void Setup()
     {
         port = new SerialPort(arduinoPort, 9600);
         port.Open();
@@ -76,7 +76,7 @@ public class CustomerHandler : MonoBehaviour
         NextCustomer();
     }
 
-    public async void NextCustomer ()
+    public async void NextCustomer()
     {
         Debug.Log("Create Customer");
         var customer = creater.CreateCustomer();
@@ -90,9 +90,9 @@ public class CustomerHandler : MonoBehaviour
 
         await Awaitable.BackgroundThreadAsync();
 
-        for ( int i = 0; i < customer.DesiredPotion.Count; i++ )
+        for (int i = 0; i < customer.DesiredPotion.Count; i++)
         {
-            if ( endAwaitInput )
+            if (endAwaitInput)
             {
                 goto CustomerLeave;
             }
@@ -104,7 +104,7 @@ public class CustomerHandler : MonoBehaviour
 
             await AwaitInput(InputIngredients, customer, i);
 
-            if ( endAwaitInput )
+            if (endAwaitInput)
             {
                 goto CustomerLeave;
             }
@@ -118,32 +118,32 @@ public class CustomerHandler : MonoBehaviour
         NextCustomer();
     }
 
-    public async Task AwaitInput ( Action<string> callBack, Customer customer, int potionIndex )
+    public async Task AwaitInput(Action<string> callBack, Customer customer, int potionIndex)
     {
         await Awaitable.BackgroundThreadAsync();
 
-        while ( awaitingIngredients )
+        while (awaitingIngredients)
         {
             string data = null;
             try
             {
                 data = port.ReadLine();
             }
-            catch ( TimeoutException )
+            catch (TimeoutException)
             {
                 Debug.LogWarning("Timed out.");
             }
 
-            if ( data != null && int.TryParse(data, out int result) )
+            if (data != null && int.TryParse(data, out int result))
             {
                 var currentIngredient = (Ingredients)(1 << result);
-                if ( !((currentIngredients & currentIngredient) != 0) )
+                if (!((currentIngredients & currentIngredient) != 0))
                 {
                     Debug.Log((Ingredients)(1 << result));
                     Debug.Log(data);
                     callBack?.Invoke(data);
 
-                    if ( fluidHandler.IsFluid(currentIngredient) )
+                    if (fluidHandler.IsFluid(currentIngredient))
                     {
                         await Awaitable.MainThreadAsync();
                         await fluidHandler.StartAnimation(result);
@@ -152,7 +152,7 @@ public class CustomerHandler : MonoBehaviour
                 }
             }
 
-            if ( currentAmountOfIngredients >= customer.DesiredPotion[potionIndex].AmountOfIngredients || endAwaitInput )
+            if (currentAmountOfIngredients >= customer.DesiredPotion[potionIndex].AmountOfIngredients || endAwaitInput)
             {
                 DisableAwaitingInput();
             }
@@ -160,14 +160,14 @@ public class CustomerHandler : MonoBehaviour
     }
 
     //For externally disabling the waiting. 
-    public void DisableAwaitingInput ()
+    public void DisableAwaitingInput()
     {
         awaitingIngredients = false;
     }
 
-    public void InputIngredients ( string input )
+    public void InputIngredients(string input)
     {
-        if ( int.TryParse(input, out int result) )
+        if (int.TryParse(input, out int result))
         {
             var ingredient = (Ingredients)(1 << result);
             currentIngredients |= ingredient;
@@ -177,7 +177,7 @@ public class CustomerHandler : MonoBehaviour
 
     private Quaternion targetRotation = Quaternion.identity;
     private float rotateCount = 0;
-    private async Task CustomerLeave ( Customer customer, bool isCorrect )
+    private async Task CustomerLeave(Customer customer, bool isCorrect)
     {
         await Awaitable.MainThreadAsync();
 
@@ -187,13 +187,13 @@ public class CustomerHandler : MonoBehaviour
         var distance = targetPosition - customer.meshObject.transform.position;
         distance.z = 0;
 
-        while ( distance.magnitude > 1.0f )
+        while (distance.magnitude > 1.0f)
         {
             distance = targetPosition - customer.meshObject.transform.position;
             distance.z = 0;
             customer.meshObject.transform.Translate(customerMoveSpeed * Time.deltaTime * distance.normalized, Space.World);
 
-            if ( !isCorrect )
+            if (!isCorrect)
             {
                 ExecuteAngryWobble(customer);
             }
@@ -202,9 +202,9 @@ public class CustomerHandler : MonoBehaviour
         }
     }
 
-    private void ExecuteAngryWobble( Customer customer )
+    private void ExecuteAngryWobble(Customer customer)
     {
-        if ( rotateCount < 10 && targetRotation != Quaternion.identity )
+        if (rotateCount < 10 && targetRotation != Quaternion.identity)
         {
             customer.meshObject.transform.rotation = Quaternion.Lerp(customer.meshObject.transform.rotation, targetRotation, Time.deltaTime);
             rotateCount++;
@@ -216,21 +216,21 @@ public class CustomerHandler : MonoBehaviour
         }
     }
 
-    private Quaternion GetRotationTarget ()
+    private Quaternion GetRotationTarget()
     {
         var magnitude = UnityEngine.Random.Range(0.1f, wobbleMagnitude);
         var curve = Mathf.Sin(UnityEngine.Random.Range(0, Mathf.PI * 2));
         return Quaternion.Euler(Vector3.forward * curve * magnitude);
     }
 
-    private async Task PerformCustomerTask ( Customer customer )
+    private async Task PerformCustomerTask(Customer customer)
     {
         await Awaitable.MainThreadAsync();
 
         var distance = ownPosition - customer.meshObject.transform.position;
         distance.z = 0;
 
-        while ( distance.magnitude > 1.0f )
+        while (distance.magnitude > 1.0f)
         {
             distance = ownPosition - customer.meshObject.transform.position;
             distance.z = 0;

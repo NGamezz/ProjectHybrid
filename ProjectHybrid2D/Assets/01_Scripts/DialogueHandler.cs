@@ -17,7 +17,7 @@ public class DialogueHandler : MonoBehaviour
 
     private Custom.Utility utility = new();
     private bool cancel = false;
-    
+
     private void Awake()
     {
         utility.Setup();
