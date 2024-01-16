@@ -2048,21 +2048,30 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   possiblePotions:
-  - Name: ukygwda
-    Ingredients: 0
-    AmountOfIngredients: 8
-  - Name: ukygwda
-    Ingredients: 0
-    AmountOfIngredients: 4
-  - Name: Yes
-    Ingredients: 0
+  - Name: "De Gr\xFCne Duvel"
+    Ingredients: 112
     AmountOfIngredients: 3
-  - Name: No
-    Ingredients: 0
+  - Name: Vurige Vloeistof
+    Ingredients: 160
     AmountOfIngredients: 3
-  - Name: Indeed
-    Ingredients: 0
-    AmountOfIngredients: 1
+  - Name: 'Plezyar Inde Rozus '
+    Ingredients: 176
+    AmountOfIngredients: 3
+  - Name: Rood Genot
+    Ingredients: 208
+    AmountOfIngredients: 3
+  - Name: 'Zalig Zwevend '
+    Ingredients: 224
+    AmountOfIngredients: 3
+  - Name: Goudse Glorie
+    Ingredients: 96
+    AmountOfIngredients: 3
+  - Name: 'Gloeiend Goedje '
+    Ingredients: 192
+    AmountOfIngredients: 3
+  - Name: Verrukelijk & Fijn
+    Ingredients: 48
+    AmountOfIngredients: 3
   - Name: Placebo
     Ingredients: 0
     AmountOfIngredients: 0
