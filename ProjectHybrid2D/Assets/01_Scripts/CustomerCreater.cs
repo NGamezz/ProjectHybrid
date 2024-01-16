@@ -214,8 +214,15 @@ public enum Ingredients
     Fluid2 = 1 << 1,
     Fluid3 = 1 << 2,
     Fluid4 = 1 << 3,
+<<<<<<< HEAD:ProjectHybrid2D/Assets/01_Scripts/CustomerCreater.cs
     Rose = 1 << 4,
     Hair = 1 << 5,
     GeckoHeado = 1 << 6,
     Feather = 1 << 7,
+=======
+    Ingred1 = 1 << 4,
+    Ingred2 = 1 << 5,
+    Ingred3 = 1 << 6,
+    Ingred4 = 1 << 7,
+>>>>>>> feb607451d115eb9d58fa3416e2656f78207a120:ProjectHybrid2D (1)/ProjectHybrid2D/Assets/01_Scripts/CustomerCreater.cs
 }
