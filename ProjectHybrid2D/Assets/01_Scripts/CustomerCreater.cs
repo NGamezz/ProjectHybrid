@@ -214,8 +214,8 @@ public enum Ingredients
     Fluid2 = 1 << 1,
     Fluid3 = 1 << 2,
     Fluid4 = 1 << 3,
-    Ingred1 = 1 << 4,
-    Ingred2 = 1 << 5,
-    Ingred3 = 1 << 6,
-    Ingred4 = 1 << 7,
+    Rose = 1 << 4,
+    Hair = 1 << 5,
+    GeckoHeado = 1 << 6,
+    Feather = 1 << 7,
 }
