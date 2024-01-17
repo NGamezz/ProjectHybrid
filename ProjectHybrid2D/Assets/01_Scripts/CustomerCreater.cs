@@ -61,8 +61,10 @@ public class CustomerCreater : MonoBehaviour
     {
         string[] dialogue = new string[customer.DesiredPotion.Count + 1];
 
+        dialogue[0] = "";
         dialogue[0] = utility.GetRandomElementFromArray(possibleOpeningDialogue);
 
+        dialogue[1] = "";
         dialogue[1] = utility.GetRandomElementFromArray(possibleRequestDialogue) + " : \n";
 
         string currentString = "";
@@ -210,12 +212,12 @@ public class Customer
 public enum Ingredients
 {
     None = 0,
-    Fluid1 = 1 << 0,
-    Fluid2 = 1 << 1,
-    Fluid3 = 1 << 2,
-    Fluid4 = 1 << 3,
-    Rose = 1 << 4,
-    Hair = 1 << 5,
-    GeckoHeado = 1 << 6,
-    Feather = 1 << 7,
+    Rood = 1 << 0,
+    Groen = 1 << 1,
+    Roze = 1 << 2,
+    Paars = 1 << 3,
+    Rose = 1 << 6,
+    Hair = 1 << 7,
+    GeckoHeado = 1 << 5,
+    Feather = 1 << 4,
 }

@@ -588,7 +588,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Canvas: []
   camera: {fileID: 519420031}
-  IsMainCamera: 1
+  IsMainCamera: 0
 --- !u!82 &519420034
 AudioSource:
   m_ObjectHideFlags: 0
@@ -702,7 +702,7 @@ MonoBehaviour:
   priority: 0
   blendDistance: 0
   weight: 1
-  sharedProfile: {fileID: 11400000, guid: cb5b352b95fa69643bb7086408493c6e, type: 2}
+  sharedProfile: {fileID: 11400000, guid: 9a6267532afae214596fac63870682bd, type: 2}
 --- !u!114 &519420036
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1004,12 +1004,12 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 20
+  m_fontSize: 18
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
-  m_fontSizeMin: 10
-  m_fontSizeMax: 20
+  m_fontSizeMin: 7
+  m_fontSizeMax: 18
   m_fontStyle: 0
   m_HorizontalAlignment: 2
   m_VerticalAlignment: 512
@@ -1072,7 +1072,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -120, y: -71.79999}
+  m_AnchoredPosition: {x: -116.900024, y: -77.9}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &959771588
@@ -2099,7 +2099,7 @@ MonoBehaviour:
           m_BoolArgument: 0
         m_CallState: 2
   wobbleMagnitude: 100
-  arduinoPort: COM6
+  arduinoPort: COM5
 --- !u!114 &1835227199
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2113,21 +2113,30 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   possiblePotions:
-  - Name: ukygwda
-    Ingredients: 0
-    AmountOfIngredients: 8
-  - Name: ukygwda
-    Ingredients: 0
-    AmountOfIngredients: 4
-  - Name: Yes
-    Ingredients: 0
+  - Name: Goudse Glorie
+    Ingredients: 162
     AmountOfIngredients: 3
-  - Name: No
-    Ingredients: 0
+  - Name: De Grune Duvel
+    Ingredients: 224
     AmountOfIngredients: 3
-  - Name: Indeed
-    Ingredients: 0
-    AmountOfIngredients: 1
+  - Name: Pleyzar Inde Rozus
+    Ingredients: 208
+    AmountOfIngredients: 3
+  - Name: Gloeiend Goedje
+    Ingredients: 56
+    AmountOfIngredients: 3
+  - Name: Vurige Vloeistof
+    Ingredients: 145
+    AmountOfIngredients: 3
+  - Name: Rood Genot
+    Ingredients: 112
+    AmountOfIngredients: 3
+  - Name: Zalig Zwevend
+    Ingredients: 176
+    AmountOfIngredients: 3
+  - Name: Verrukelijk & Fijn
+    Ingredients: 196
+    AmountOfIngredients: 3
   - Name: Placebo
     Ingredients: 0
     AmountOfIngredients: 0
@@ -2136,13 +2145,13 @@ MonoBehaviour:
   - Bern
   - Abababa
   possibleOpeningDialogue:
-  - Hello
-  - Greetings
+  - Gegroet
+  - Goedendag
   possibleRequestDialogue:
-  - I would like a
-  - May I get a
+  - Graag wil ik
+  - Geeft u mij alstublieft
   possibleNextPotionDialogue:
-  - Next potion.
+  - Volgende drankje
   possibleMeshes:
   - {fileID: 2534371350695294774, guid: 5e2b2e75423510c469d971677f6b542d, type: 3}
   - {fileID: 2912482113939404710, guid: 9b3383da564a8a44ea12421a42f77342, type: 3}

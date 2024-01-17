@@ -76,10 +76,11 @@ public class DialogueHandler : MonoBehaviour
             if (cancel)
             {
                 SetBubble(false);
-                return;
+                goto EndDialogue;
             }
         }
 
+    EndDialogue:
         SetBubble(false);
     }
 
