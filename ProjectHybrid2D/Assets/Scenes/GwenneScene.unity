@@ -600,7 +600,7 @@ AudioSource:
   m_audioClip: {fileID: 8300000, guid: 015193157b5611d459692f1cc70c456d, type: 3}
   m_Resource: {fileID: 8300000, guid: 015193157b5611d459692f1cc70c456d, type: 3}
   m_PlayOnAwake: 1
-  m_Volume: 1
+  m_Volume: 0.75
   m_Pitch: 1
   Loop: 1
   Mute: 0
@@ -1969,6 +1969,8 @@ GameObject:
   - component: {fileID: 1835227199}
   - component: {fileID: 1835227200}
   - component: {fileID: 1835227201}
+  - component: {fileID: 1835227203}
+  - component: {fileID: 1835227202}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -2034,7 +2036,7 @@ MonoBehaviour:
           m_BoolArgument: 0
         m_CallState: 2
   wobbleMagnitude: 100
-  arduinoPort: COM4
+  arduinoPort: COM6
 --- !u!114 &1835227199
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2133,6 +2135,67 @@ MonoBehaviour:
   animations: []
   fluids: 0
   amountOfFluids: 0
+--- !u!114 &1835227202
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1835227194}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cb711168829478a4ea2528e22822ab93, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sceneIndex: 0
+--- !u!114 &1835227203
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1835227194}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2ab36f1215fcc8a498f3da363bab107c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  KeyPressed:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1835227202}
+        m_TargetAssemblyTypeName: ReloadScene, Assembly-CSharp
+        m_MethodName: ReloadSceneNow
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  KeyPressedAgain:
+    m_PersistentCalls:
+      m_Calls: []
+  actionToActivate:
+    m_Name: Action To Activate
+    m_Type: 0
+    m_ExpectedControlType: 
+    m_Id: ce1aae5f-f89f-483a-bd08-b047b727817f
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings:
+    - m_Name: 
+      m_Id: e96dcc18-1891-4821-9fcd-f9a6da71492c
+      m_Path: <Keyboard>/escape
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Action To Activate
+      m_Flags: 0
+    m_Flags: 0
+  performDifferentActionWhenPressedBefore: 0
 --- !u!1 &1880477665
 GameObject:
   m_ObjectHideFlags: 0
