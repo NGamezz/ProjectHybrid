@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO.Ports;
+using System.Threading;
 using System.Threading.Tasks;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -18,6 +20,33 @@ public class CustomerHandler : MonoBehaviour
 
     [SerializeField] private float wobbleMagnitude = 1.0f;
 
+    [SerializeField] private AudioSource soundEffectAudioSource;
+
+    [SerializeField] private AudioClip correctAudioClip;
+    [SerializeField] private AudioClip correctIngredientAudioClip;
+    [SerializeField] private AudioClip wrongAudioClip;
+    [SerializeField] private AudioClip wrongIngredientAudioClip;
+
+    [SerializeField] private TMP_Text scoreText;
+    private int score = int.MinValue;
+    public int Score
+    {
+        get
+        {
+            return score;
+        }
+        set
+        {
+            if (score != value)
+            {
+                score = value;
+                scoreText.text = $"Score = {score}";
+            }
+        }
+    }
+
+    [SerializeField] private GameObject startScreen;
+
     private Ingredients currentIngredients = Ingredients.None;
     private int currentAmountOfIngredients = 0;
     private bool awaitingIngredients = false;
@@ -33,11 +62,25 @@ public class CustomerHandler : MonoBehaviour
     private bool endAwaitInput = false;
     private FluidHandler fluidHandler;
 
+    private bool started = false;
+
     private void Awake()
     {
         creater = GetComponent<CustomerCreater>();
         dialogueHandler = GetComponent<DialogueHandler>();
         fluidHandler = GetComponent<FluidHandler>();
+        soundEffectAudioSource = GetComponent<AudioSource>();
+        startScreen.SetActive(true);
+    }
+
+    public void StartCustomerFlow()
+    {
+        if (!started)
+        {
+            startScreen.SetActive(false);
+            started = true;
+            Setup();
+        }
     }
 
     private void OnDisable()
@@ -47,17 +90,30 @@ public class CustomerHandler : MonoBehaviour
 
     void Start()
     {
+        scoreText.gameObject.SetActive(false);
         ownPosition = transform.position;
-        continuationAction += Test;
+        continuationAction += Continuation;
         outOfPotionsAction += (() => Debug.Log("Out Of Potions."));
-        Setup();
     }
 
     private bool isCorrect = false;
 
-    private void Test(Customer customer, bool isCorrect)
+    //private void OutOfTime()
+    //{
+    //    //await PlayAudioClip(false, true);
+
+    //    Debug.Log("Out Of Time.");
+
+    //    endAwaitInput = true;
+    //    awaitingIngredients = false;
+    //    Debug.Log(endAwaitInput);
+    //}
+
+    private void Continuation(Customer customer, bool isCorrect)
     {
         this.isCorrect = isCorrect;
+
+        //await PlayAudioClip(isCorrect, false);
 
         if (!isCorrect)
         {
@@ -68,11 +124,17 @@ public class CustomerHandler : MonoBehaviour
 
     private void Setup()
     {
-        port = new SerialPort(arduinoPort, 9600);
+        port = new SerialPort(arduinoPort, 9600)
+        {
+            ReadTimeout = 1000,
+        };
         port.Open();
 
         continuationAction += dialogueHandler.ContinueDialogue;
+        //dialogueHandler.OnFail += OutOfTime;
 
+        scoreText.gameObject.SetActive(true);
+        Score = 0;
         NextCustomer();
     }
 
@@ -114,12 +176,52 @@ public class CustomerHandler : MonoBehaviour
     CustomerLeave:
 
         endAwaitInput = false;
+        //await PlayAudioClip(isCorrect, true);
+        if (isCorrect)
+        {
+            Score++;
+        }
+        Debug.Log("End Await.");
         await CustomerLeave(customer, isCorrect);
         NextCustomer();
     }
 
+    private async Task PlayAudioClip(bool correct, bool finished)
+    {
+        AudioClip audioClip = null;
+
+        if (correct && !finished)
+        {
+            audioClip = correctIngredientAudioClip;
+        }
+        if (!correct && !finished)
+        {
+            audioClip = wrongIngredientAudioClip;
+        }
+        if (correct && finished)
+        {
+            audioClip = correctAudioClip;
+        }
+        if (!correct && finished)
+        {
+            audioClip = wrongAudioClip;
+        }
+
+        if (audioClip == null) { return; }
+
+        soundEffectAudioSource.clip = audioClip;
+        soundEffectAudioSource.Play();
+
+        while (soundEffectAudioSource.isPlaying)
+        {
+            await Awaitable.WaitForSecondsAsync(0.1f);
+        }
+    }
+
     public async Task AwaitInput(Action<string> callBack, Customer customer, int potionIndex)
     {
+        Debug.Log("Await Input.");
+
         await Awaitable.BackgroundThreadAsync();
 
         while (awaitingIngredients)
@@ -143,18 +245,27 @@ public class CustomerHandler : MonoBehaviour
                     Debug.Log(data);
                     callBack?.Invoke(data);
 
-                    if (fluidHandler.IsFluid(currentIngredient))
-                    {
-                        await Awaitable.MainThreadAsync();
-                        await fluidHandler.StartAnimation(result);
-                        await Awaitable.BackgroundThreadAsync();
-                    }
+                    //if (fluidHandler.IsFluid(currentIngredient))
+                    //{
+                    //    await Awaitable.MainThreadAsync();
+                    //    await fluidHandler.StartAnimation(result);
+                    //    await Awaitable.BackgroundThreadAsync();
+                    //}
                 }
             }
 
-            if (currentAmountOfIngredients >= customer.DesiredPotion[potionIndex].AmountOfIngredients || endAwaitInput)
+            if (endAwaitInput)
             {
+                Debug.Log(endAwaitInput);
                 DisableAwaitingInput();
+                return;
+            }
+
+            if (currentAmountOfIngredients >= customer.DesiredPotion[potionIndex].AmountOfIngredients)
+            {
+                Debug.Log(endAwaitInput);
+                DisableAwaitingInput();
+                return;
             }
         }
     }

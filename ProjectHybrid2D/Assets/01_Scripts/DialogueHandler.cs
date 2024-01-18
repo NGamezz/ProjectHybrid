@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
@@ -7,27 +8,54 @@ public class DialogueHandler : MonoBehaviour
     [Tooltip("Amount of seconds, delay.")]
     [SerializeField] private float writeSpeed = 0.05f;
 
+    [Tooltip("Linger Time In Seconds.")]
+    [SerializeField] private float lingerTime = 2.0f;
+
     [SerializeField] private string[] possibleCorrectDialogue;
     [SerializeField] private string[] possibleInCorrectDialogue;
 
     [SerializeField] private GameObject textBubbleGameObject;
 
+    [SerializeField] private float customerTimeFrame = 30.0f;
+    [SerializeField] private TMP_Text timerText;
+
     [SerializeField] private TMP_Text dialogueText;
     private bool continueDialogue;
 
+    public Action OnFail;
+
     private Custom.Utility utility = new();
     private bool cancel = false;
+
+    private double timer = 0;
+    private double Timer
+    {
+        get
+        {
+            return timer;
+        }
+        set
+        {
+            if (timer != value)
+            {
+                timerText.text = $"Time Remaining = {timer:0.0}";
+                timer = value;
+            }
+        }
+    }
 
     private void Awake()
     {
         utility.Setup();
         SetBubble(false);
+        OnFail += EndDialogue;
     }
 
     public async void SetBubble(bool state)
     {
         await Awaitable.MainThreadAsync();
 
+        timerText.gameObject.SetActive(state);
         textBubbleGameObject.SetActive(state);
     }
 
@@ -55,8 +83,10 @@ public class DialogueHandler : MonoBehaviour
 
     public async void PlayDialogue(Customer customer)
     {
+        dialogueText.text = "";
         cancel = false;
         SetBubble(true);
+        //Timer = customerTimeFrame;
         await TypeWriterPlay(customer.CurrentDialogue());
         customer.NextDialogue();
         await TypeWriterPlay(customer.CurrentDialogue());
@@ -64,8 +94,15 @@ public class DialogueHandler : MonoBehaviour
 
         foreach (var _ in customer.DesiredPotion)
         {
+            //Timer = customerTimeFrame;
+
             while (!continueDialogue && !cancel)
             {
+                //Timer -= 0.1f;
+                //if (Timer <= 0)
+                //{
+                //    OnFail?.Invoke();
+                //}
                 await Awaitable.WaitForSecondsAsync(0.1f);
             }
             continueDialogue = false;
@@ -75,12 +112,12 @@ public class DialogueHandler : MonoBehaviour
 
             if (cancel)
             {
+                Debug.Log("Cancel");
                 SetBubble(false);
-                goto EndDialogue;
+                return;
             }
         }
 
-    EndDialogue:
         SetBubble(false);
     }
 
@@ -101,5 +138,7 @@ public class DialogueHandler : MonoBehaviour
             dialogueText.text += c;
             await Awaitable.WaitForSecondsAsync(writeSpeed);
         }
+
+        await Awaitable.WaitForSecondsAsync(lingerTime);
     }
 }

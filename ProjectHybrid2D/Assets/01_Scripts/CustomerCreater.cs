@@ -81,7 +81,7 @@ public class CustomerCreater : MonoBehaviour
                 return dialogue;
             }
 
-            var current = utility.GetRandomElementFromArray(possibleNextPotionDialogue, currentString, 0, maxAmountOfIngredientRetries);
+            var current = utility.GetRandomElementFromArray(possibleNextPotionDialogue, currentString, 0, maxAmountOfIngredientRetries) + $": {customer.DesiredPotion[i + 1].Name}.";
             if (current == null)
             {
                 continue;
