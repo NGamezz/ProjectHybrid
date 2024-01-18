@@ -51,6 +51,11 @@ public class DialogueHandler : MonoBehaviour
         OnFail += EndDialogue;
     }
 
+    public void SetDialogueEvent(ref Action<Customer> action)
+    {
+        action += PlayDialogue;
+    }
+
     public async void SetBubble(bool state)
     {
         await Awaitable.MainThreadAsync();
@@ -83,10 +88,12 @@ public class DialogueHandler : MonoBehaviour
 
     public async void PlayDialogue(Customer customer)
     {
-        dialogueText.text = "";
+        await Awaitable.MainThreadAsync();
+
+        Debug.Log("Play Dialogue.");
         cancel = false;
+        Timer = customerTimeFrame;
         SetBubble(true);
-        //Timer = customerTimeFrame;
         await TypeWriterPlay(customer.CurrentDialogue());
         customer.NextDialogue();
         await TypeWriterPlay(customer.CurrentDialogue());
@@ -94,15 +101,15 @@ public class DialogueHandler : MonoBehaviour
 
         foreach (var _ in customer.DesiredPotion)
         {
-            //Timer = customerTimeFrame;
+            Timer = customerTimeFrame;
 
             while (!continueDialogue && !cancel)
             {
-                //Timer -= 0.1f;
-                //if (Timer <= 0)
-                //{
-                //    OnFail?.Invoke();
-                //}
+                Timer -= 0.1f;
+                if (Timer <= 0)
+                {
+                    OnFail?.Invoke();
+                }
                 await Awaitable.WaitForSecondsAsync(0.1f);
             }
             continueDialogue = false;

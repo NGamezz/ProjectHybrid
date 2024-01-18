@@ -57,6 +57,8 @@ public class CustomerHandler : MonoBehaviour
 
     [SerializeField] private string arduinoPort = "COM8";
 
+    private Action<Customer> playDialogueAction;
+
     private Action<Customer, bool> continuationAction;
     private Action outOfPotionsAction;
     private bool endAwaitInput = false;
@@ -93,21 +95,27 @@ public class CustomerHandler : MonoBehaviour
         scoreText.gameObject.SetActive(false);
         ownPosition = transform.position;
         continuationAction += Continuation;
+        playDialogueAction += Test;
         outOfPotionsAction += (() => Debug.Log("Out Of Potions."));
     }
 
     private bool isCorrect = false;
 
-    //private void OutOfTime()
-    //{
-    //    //await PlayAudioClip(false, true);
+    private void Test(Customer _)
+    {
+        Debug.Log("Event Call.");
+    }
 
-    //    Debug.Log("Out Of Time.");
+    private void OutOfTime()
+    {
+        //await PlayAudioClip(false, true);
 
-    //    endAwaitInput = true;
-    //    awaitingIngredients = false;
-    //    Debug.Log(endAwaitInput);
-    //}
+        Debug.Log("Out Of Time.");
+
+        endAwaitInput = true;
+        awaitingIngredients = false;
+        Debug.Log(endAwaitInput);
+    }
 
     private void Continuation(Customer customer, bool isCorrect)
     {
@@ -131,7 +139,8 @@ public class CustomerHandler : MonoBehaviour
         port.Open();
 
         continuationAction += dialogueHandler.ContinueDialogue;
-        //dialogueHandler.OnFail += OutOfTime;
+        dialogueHandler.OnFail += OutOfTime;
+        dialogueHandler.SetDialogueEvent(ref playDialogueAction);
 
         scoreText.gameObject.SetActive(true);
         Score = 0;
@@ -146,7 +155,8 @@ public class CustomerHandler : MonoBehaviour
 
         await PerformCustomerTask(customer);
 
-        dialogueHandler.PlayDialogue(customer);
+        playDialogueAction?.Invoke(customer);
+        //dialogueHandler.PlayDialogue(customer);
 
         customer.SetOutOfPotionsAction(outOfPotionsAction);
 
